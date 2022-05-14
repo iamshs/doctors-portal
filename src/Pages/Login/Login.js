@@ -1,21 +1,44 @@
 import React from "react";
-import { useSignInWithGoogle } from "react-firebase-hooks/auth";
+import { useSignInWithEmailAndPassword, useSignInWithGoogle } from "react-firebase-hooks/auth";
 import auth from "../../firebase.init";
 import { useForm } from "react-hook-form";
+import Loading from "../Shared/Loading";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 const Login = () => {
-  const [signInWithGoogle, user] = useSignInWithGoogle(auth);
+  const [signInWithGoogle, gUser,gLoading,gError] = useSignInWithGoogle(auth);
+  const [
+    signInWithEmailAndPassword,
+    user,
+    loading,
+    error,
+  ] = useSignInWithEmailAndPassword(auth);
+  let signError;
   const {
     register,
     formState: { errors },
     handleSubmit,
   } = useForm();
+  const navigate = useNavigate();
+  const location = useLocation();
+  let from = location.state?.from?.pathname || "/";
 
-  if (user) {
-    console.log(user);
+  if (user || gUser) {
+    navigate(from, { replace: true });
+  }
+  
+  if (loading || gLoading){
+    return <Loading />
   }
 
-  const onSubmit = (data) => console.log(data);
+  if (error || gError){
+     signError= <p className="text-red-500"> <small> {error?.message ||gError?.message} </small> </p>
+  }
+
+  const onSubmit = (data) => {
+    console.log(data);
+    signInWithEmailAndPassword(data.email,data.password)
+  }
 
   return (
     <div className="flex justify-center items-center h-screen">
@@ -60,6 +83,7 @@ const Login = () => {
               <label className="label">
                 <span className="label-text">Password</span>
               </label>
+            {signError}
               <input
                 type="password"
                 placeholder="Password"
@@ -88,11 +112,19 @@ const Login = () => {
                 )}
               </label>
             </div>
+            
+            {signError}
             <input
               className="btn  w-full max-w-xs "
               type="submit"
               value={"login"}
             />
+    <p>
+       <small>
+         New to Doctors Portal? <Link className="text-secondary" to={'/signup'}> Create an account now </Link>
+    </small>
+    </p>
+
           </form>
 
           <div className="divider">OR</div>

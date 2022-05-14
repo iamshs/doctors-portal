@@ -1,8 +1,19 @@
+import { signOut } from "firebase/auth";
 import React from "react";
-import { Link } from "react-router-dom";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { Link, useNavigate } from "react-router-dom";
+import auth from "../../firebase.init";
 
 const Navbar = () => {
-
+  const [user] = useAuthState(auth);
+  const navigate = useNavigate()
+  console.log(user)
+  const logout = ()=>{
+    signOut(auth)
+    navigate('/login')
+    
+  }
+    
 const menuItems = <>
  <li>
               <Link to='/'>Home</Link>
@@ -19,9 +30,7 @@ const menuItems = <>
             <li>
              <Link to='/about' >About</Link>
             </li>
-            <li>
-            <Link to='/login' >Login</Link>
-            </li>
+            <li>{user ? <button className="btn btn-ghost"  onClick={logout} >Sign Out</button> : <Link to="/login">Login</Link>}</li>
             </>    
   return (
     <div className="navbar bg-base-100">
@@ -36,7 +45,6 @@ const menuItems = <>
               stroke="currentColor"
             >
               <path
-                strokeLinecap="round"
                 strokeLinecap="round"
                 strokeWidth="2"
                 d="M4 6h16M4 12h8m-8 6h16"
